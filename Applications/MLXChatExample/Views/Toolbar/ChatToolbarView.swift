@@ -24,6 +24,7 @@ struct ChatToolbarView: View {
             DownloadProgressView(progress: progress)
         }
 
+
         // Button to clear chat history, displays generation statistics
         Button {
             vm.clear([.chat, .meta])

@@ -825,6 +825,7 @@ public func generate(
                 }
 
                 detokenizer.append(token: token)
+                
                 if let chunk = detokenizer.next() {
                     tokenCount += 1
 

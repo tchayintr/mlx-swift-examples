@@ -25,6 +25,9 @@ class MLXService {
         LMModel(name: "qwen3:1.7b", configuration: LLMRegistry.qwen3_1_7b_4bit, type: .llm),
         LMModel(name: "qwen3:4b", configuration: LLMRegistry.qwen3_4b_4bit, type: .llm),
         LMModel(name: "qwen3:8b", configuration: LLMRegistry.qwen3_8b_4bit, type: .llm),
+        LMModel(name: "ChindaLLM:4b-4bit", configuration: LLMRegistry.chinda_4b_4bit, type: .llm),
+        LMModel(name: "ChindaLLM:4b", configuration: LLMRegistry.chinda_4b, type: .llm),
+        LMModel(name: "qwen3:1.7b-bf16", configuration: LLMRegistry.qwen3_1_7b_bf16, type: .llm),
         LMModel(
             name: "qwen2.5VL:3b", configuration: VLMRegistry.qwen2_5VL3BInstruct4Bit, type: .vlm),
         LMModel(name: "qwen2VL:2b", configuration: VLMRegistry.qwen2VL2BInstruct4Bit, type: .vlm),

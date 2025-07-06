@@ -133,12 +133,39 @@ public struct NaiveStreamingDetokenizer: StreamingDetokenizer {
         }
     }
 
+
+    /// Checks if a string contains ANY Thai characters
+    /// Used to determine whether to apply Thai-specific text processing
+    private func containsThaiCharacters(_ text: String) -> Bool {
+        // Thai Unicode range: U+0E01-U+0E7F
+        let thaiRange = UnicodeScalar(0x0E01)!...UnicodeScalar(0x0E7F)!
+        
+        return text.unicodeScalars.contains { scalar in
+            thaiRange.contains(scalar)
+        }
+    }
+
+
     public mutating func next() -> String? {
         let newSegment = tokenizer.decode(tokens: segmentTokens)
-        let new = newSegment.suffix(newSegment.count - segment.count)
+        
+        // Use Unicode scalar count for Thai text to properly handle combining characters
+        let isThaiText = containsThaiCharacters(newSegment) || containsThaiCharacters(segment)
+        let countDiff = isThaiText ? 
+            newSegment.unicodeScalars.count - segment.unicodeScalars.count :
+            newSegment.count - segment.count
+        
+        // For Thai text, extract new Unicode scalars directly to avoid character boundary issues
+        let new: String
+        if isThaiText && countDiff > 0 {
+            // Extract the new Unicode scalars directly
+            let newScalars = Array(newSegment.unicodeScalars.suffix(countDiff))
+            new = String(String.UnicodeScalarView(newScalars))
+        } else {
+            new = String(newSegment.suffix(countDiff))
+        }
 
-        // if the new segment ends with REPLACEMENT CHARACTER this means
-        // that the token didn't produce a complete unicode character
+        // Handle replacement characters
         if new.last == "\u{fffd}" {
             return nil
         }
@@ -149,7 +176,7 @@ public struct NaiveStreamingDetokenizer: StreamingDetokenizer {
             self.segment = newSegment
         }
 
-        return String(new)
+        return new
     }
 
 }

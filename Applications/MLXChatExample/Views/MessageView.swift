@@ -61,7 +61,7 @@ struct MessageView: View {
             // Assistant messages are left-aligned without background
             // LocalizedStringKey used to trigger default handling of markdown content.
             HStack {
-                Text(LocalizedStringKey(message.content))
+                Text(message.content)
                     .textSelection(.enabled)
 
                 Spacer()
