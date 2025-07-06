@@ -26,7 +26,7 @@ class ChatViewModel {
 
     /// Chat history containing system, user, and assistant messages
     var messages: [Message] = [
-        .system("You are a helpful assistant!")
+        .system("You are Chinda LLM, powering the ChindaGo app by iApp Technology. Respond helpfully and accurately, primarily in Thai.")
     ]
 
     /// Currently selected language model for generation
