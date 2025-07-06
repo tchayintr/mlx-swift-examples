@@ -143,7 +143,7 @@ class ChatViewModel {
         }
 
         if options.contains(.chat) {
-            messages = []
+            messages = messages.filter { $0.role == .system }
             generateTask?.cancel()
         }
 
