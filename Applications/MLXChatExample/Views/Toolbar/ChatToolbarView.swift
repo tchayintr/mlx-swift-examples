@@ -2,13 +2,12 @@
 //  ChatToolbarView.swift
 //  MLXChatExample
 //
-//  Created by İbrahim Çetin on 21.04.2025.
+//  Created by tchayintr on 06.07.2025.
 //
 
 import SwiftUI
 
-/// Toolbar view for the chat interface that displays error messages, download progress,
-/// generation statistics, and model selection controls.
+/// Futuristic toolbar view for the chat interface with glass morphism design
 struct ChatToolbarView: View {
     /// View model containing the chat state and controls
     @Bindable var vm: ChatViewModel
@@ -24,22 +23,10 @@ struct ChatToolbarView: View {
             DownloadProgressView(progress: progress)
         }
 
+        // Display-only generation statistics (no longer clickable for clearing)
+        GenerationInfoView(tokensPerSecond: vm.tokensPerSecond)
 
-        // Button to clear chat history, displays generation statistics
-        Button {
-            vm.clear([.chat, .meta])
-        } label: {
-            GenerationInfoView(
-                tokensPerSecond: vm.tokensPerSecond
-            )
-        }
-
-        // Model selection picker
-        Picker("Model", selection: $vm.selectedModel) {
-            ForEach(MLXService.availableModels) { model in
-                Text(model.displayName)
-                    .tag(model)
-            }
-        }
+        // Futuristic model selection
+        FuturisticModelSelector(selectedModel: $vm.selectedModel)
     }
 }
