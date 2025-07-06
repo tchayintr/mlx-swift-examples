@@ -47,7 +47,6 @@ struct ChatView: View {
                 .padding()
             }
             .navigationTitle("ChindaGo")
-//            .navigationTitle("MLX Chat Example")
             .toolbar {
                 ChatToolbarView(vm: vm)
             }
