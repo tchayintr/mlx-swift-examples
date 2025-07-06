@@ -46,7 +46,7 @@ struct ChatView: View {
                 )
                 .padding()
             }
-            .navigationTitle("Local LLM on iOS")
+            .navigationTitle("ChindaGo")
 //            .navigationTitle("MLX Chat Example")
             .toolbar {
                 ChatToolbarView(vm: vm)
