@@ -28,5 +28,10 @@ struct ChatToolbarView: View {
 
         // Futuristic model selection
         FuturisticModelSelector(selectedModel: $vm.selectedModel)
+
+        // Compact new chat button
+        CompactNewChatButton {
+            vm.clear([.chat, .meta])
+        }
     }
 }

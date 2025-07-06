@@ -25,11 +25,12 @@ struct FuturisticModelSelector: View {
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.blue)
                 
-                // Model name
+                // Model name with truncation for fixed width
                 Text(selectedModel.displayName)
                     .font(.glassButton)
                     .foregroundColor(.primary)
                     .lineLimit(1)
+                    .truncationMode(.tail)
                 
                 // Dropdown indicator
                 Image(systemName: "chevron.down")
@@ -81,6 +82,7 @@ struct ModelSelectionSheet: View {
     
     var body: some View {
         NavigationStack {
+            #if os(iOS)
             ZStack {
                 // Glass background
                 Color.clear
@@ -91,26 +93,22 @@ struct ModelSelectionSheet: View {
                     // Search field
                     SearchField(text: $searchText)
                     
-                    // Model grid
-                    ScrollView {
-                        LazyVGrid(columns: [
-                            GridItem(.flexible()),
-                            GridItem(.flexible())
-                        ], spacing: GlassDesignSystem.Spacing.medium) {
-                            ForEach(filteredModels) { model in
-                                ModelCard(
-                                    model: model,
-                                    isSelected: model.id == selectedModel.id,
-                                    action: {
-                                        selectedModel = model
-                                        onSelection()
-                                        dismiss()
-                                    }
-                                )
+                    // Model list
+                    List(filteredModels) { model in
+                        ModelListRow(
+                            model: model,
+                            isSelected: model.id == selectedModel.id,
+                            action: {
+                                selectedModel = model
+                                onSelection()
+                                dismiss()
                             }
-                        }
-                        .padding(.horizontal)
+                        )
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
                     }
+                    .listStyle(.plain)
+                    .scrollContentBackground(.hidden)
                 }
                 .padding()
             }
@@ -122,12 +120,46 @@ struct ModelSelectionSheet: View {
                 }
                 .font(.glassButton)
             }
+            #else
+            VStack(spacing: GlassDesignSystem.Spacing.large) {
+                // Search field
+                SearchField(text: $searchText)
+                
+                // Model list using ScrollView for better macOS compatibility
+                ScrollView {
+                    LazyVStack(spacing: GlassDesignSystem.Spacing.xs) {
+                        ForEach(filteredModels) { model in
+                            ModelListRow(
+                                model: model,
+                                isSelected: model.id == selectedModel.id,
+                                action: {
+                                    selectedModel = model
+                                    onSelection()
+                                    dismiss()
+                                }
+                            )
+                        }
+                    }
+                    .padding(.horizontal)
+                }
+                .frame(maxHeight: 400) // Explicit height for ScrollView
+            }
+            .padding()
+            .navigationTitle("Select Model")
+            .glassNavigation()
+            .glassToolbar {
+                Button("Done") {
+                    dismiss()
+                }
+                .font(.glassButton)
+            }
+            #endif
         }
     }
 }
 
-/// Individual model selection card
-struct ModelCard: View {
+/// Individual model selection row for list display
+struct ModelListRow: View {
     let model: LMModel
     let isSelected: Bool
     let action: () -> Void
@@ -139,7 +171,7 @@ struct ModelCard: View {
             performHapticFeedback(style: .light)
             action()
         }) {
-            VStack(spacing: GlassDesignSystem.Spacing.small) {
+            HStack(spacing: GlassDesignSystem.Spacing.medium) {
                 // Model type icon
                 ZStack {
                     Circle()
@@ -150,46 +182,72 @@ struct ModelCard: View {
                                     [Color.blue.opacity(0.3), Color.cyan.opacity(0.1)],
                                 center: .center,
                                 startRadius: 5,
-                                endRadius: 25
+                                endRadius: 20
                             )
                         )
-                        .frame(width: 50, height: 50)
+                        .frame(width: 40, height: 40)
                     
                     Image(systemName: model.isVisionModel ? "eye.fill" : "brain.head.profile")
-                        .font(.system(size: 20, weight: .medium))
+                        .font(.system(size: 16, weight: .medium))
                         .foregroundColor(model.isVisionModel ? .purple : .blue)
                 }
                 
-                // Model name
-                Text(model.displayName)
-                    .font(.glassCaption)
-                    .foregroundColor(.primary)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
+                // Model information
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(model.displayName)
+                        .font(.glassChatText)
+                        .foregroundColor(.primary)
+                        .lineLimit(1)
+                    
+                    if model.isVisionModel {
+                        Text("Vision Model")
+                            .font(.glassCaption)
+                            .foregroundColor(.purple)
+                    } else {
+                        Text("Language Model")
+                            .font(.glassCaption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                
+                Spacer()
                 
                 // Selection indicator
                 if isSelected {
-                    HStack(spacing: 4) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 12))
-                            .foregroundColor(.green)
-                        Text("Selected")
-                            .font(.system(size: 10, weight: .medium))
-                            .foregroundColor(.green)
-                    }
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 20))
+                        .foregroundColor(.green)
                 }
             }
-            .padding(GlassDesignSystem.Spacing.medium)
-            .frame(height: 120)
-            .glassPrimary()
-            .overlay(
-                RoundedRectangle(cornerRadius: GlassDesignSystem.CornerRadius.large)
-                    .stroke(
-                        isSelected ? Color.green.opacity(0.5) : Color.clear,
-                        lineWidth: 2
+            .padding(.vertical, GlassDesignSystem.Spacing.small)
+            .padding(.horizontal, GlassDesignSystem.Spacing.medium)
+            #if os(iOS)
+            .background(
+                RoundedRectangle(cornerRadius: GlassDesignSystem.CornerRadius.medium)
+                    .fill(.ultraThinMaterial)
+                    .overlay(
+                        // Only show border when selected
+                        isSelected ? 
+                        RoundedRectangle(cornerRadius: GlassDesignSystem.CornerRadius.medium)
+                            .stroke(Color.green.opacity(0.5), lineWidth: 2) :
+                        nil
                     )
             )
-            .scaleEffect(isPressed ? 0.95 : 1.0)
+            #else
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(isSelected ? Color.accentColor.opacity(0.2) : Color.gray.opacity(0.1))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(
+                                isSelected ? Color.accentColor : Color.gray.opacity(0.3),
+                                lineWidth: isSelected ? 2 : 1
+                            )
+                    )
+            )
+            .frame(minHeight: 60) // Ensure minimum height for visibility
+            #endif
+            .scaleEffect(isPressed ? 0.98 : 1.0)
             .animation(.glassEaseInOut, value: isPressed)
         }
         .buttonStyle(PlainButtonStyle())

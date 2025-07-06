@@ -254,4 +254,47 @@ extension View {
         }
         #endif
     }
+    
+    /// Cross-platform toolbar with leading placement
+    func glassToolbarLeading<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        #if os(iOS)
+        self.toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                content()
+            }
+        }
+        #else
+        self.toolbar {
+            ToolbarItem(placement: .leading) {
+                content()
+            }
+        }
+        #endif
+    }
+    
+    /// Cross-platform toolbar with principal (center) placement
+    func glassToolbarPrincipal<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        self.toolbar {
+            ToolbarItem(placement: .principal) {
+                content()
+            }
+        }
+    }
+    
+    /// Cross-platform toolbar with trailing placement
+    func glassToolbarTrailing<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        #if os(iOS)
+        self.toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                content()
+            }
+        }
+        #else
+        self.toolbar {
+            ToolbarItem(placement: .trailing) {
+                content()
+            }
+        }
+        #endif
+    }
 }

@@ -362,6 +362,226 @@ struct GlassDesignSystem {
 - ✅ **Maintainable**: Single modifier system handles all cross-platform differences
 - ✅ **Extensible**: Easy to add new cross-platform modifiers as needed
 
+## UI/UX Refinements
+
+### New Chat Button Repositioning
+**Issue**: Floating action button blocked message content and created visual clutter  
+**Solution**: Integrated compact button into top toolbar for better accessibility  
+**Status**: ✅ Implemented with cross-platform support  
+
+**Implementation Details**:
+- **New Component**: `CompactNewChatButton.swift` - 32x32pt compact button for toolbar
+- **Cross-Platform Design**: Glass styling on iOS, standard button appearance on macOS
+- **Integration**: Added to `ChatToolbarView.swift` alongside other controls
+- **Layout Improvement**: Removed floating overlay from `ChatView.swift` for cleaner interface
+
+**Benefits**:
+- ✅ **Better UX**: No content blocking, always accessible
+- ✅ **Consistent**: Integrated with existing toolbar controls
+- ✅ **Cross-Platform**: Appropriate styling for each platform
+
+### Model Selection List Redesign
+**Issue**: Tile-based grid layout had inconsistent sizing and poor information hierarchy  
+**Solution**: Converted to clean list design with consistent row heights and better information display  
+**Status**: ✅ Implemented with cross-platform compatibility  
+
+**Implementation Details**:
+- **New Component**: `ModelListRow` - Consistent list row with model information
+- **Layout Change**: Replaced `LazyVGrid` with native `List` component
+- **Cross-Platform**: Uses `.listStyle(.plain)` with platform-specific row backgrounds
+- **Information Hierarchy**: Icon + model name + type + selection indicator
+- **Consistent Sizing**: Fixed row heights with proper spacing
+
+**List Design Features**:
+- **Model Icon**: 40x40pt circular gradient background with type-specific colors
+- **Information Layout**: Model name + type indicator (Vision/Language Model)
+- **Selection State**: Green checkmark with border highlight
+- **Glass Styling**: Ultra-thin material backgrounds maintain glass morphism
+- **Search Integration**: Maintains existing real-time filtering functionality
+
+**Cross-Platform Considerations**:
+- **iOS**: Clear list row backgrounds for glass effect, custom styling
+- **macOS**: Native list appearance with automatic platform adaptations
+- **Both**: Consistent functionality and information display
+
+**Benefits**:
+- ✅ **Consistent Design**: Uniform row heights and information layout
+- ✅ **Better Information**: Clearer model type indicators and capabilities
+- ✅ **Improved UX**: Easier scanning and selection process
+- ✅ **Cross-Platform**: Works naturally on both iOS and macOS
+- ✅ **Maintainable**: Simpler component structure and styling
+
+### UI/UX Issue Fixes and Enhancements
+
+#### macOS Model Selection Fix
+**Issue**: No models displaying in model selection list on macOS  
+**Cause**: iOS-specific list modifiers (`.scrollContentBackground(.hidden)`) hiding content on macOS  
+**Fix**: Applied conditional compilation to platform-specific list styling  
+**Status**: ✅ Fixed  
+
+**Implementation**:
+```swift
+// Fixed cross-platform list styling
+.listStyle(.plain)
+#if os(iOS)
+.scrollContentBackground(.hidden)
+#endif
+```
+
+#### Enhanced New Chat Button Design
+**Issue**: Original button too small and old-fashioned appearance  
+**Solution**: Redesigned with larger size, text label, and futuristic styling  
+**Status**: ✅ Enhanced with cross-platform support  
+
+**New Design Features**:
+- **Larger Size**: ~120pt width with "New Chat" text + icon
+- **iOS Styling**: Glass morphism with blue-cyan gradient overlay and shadow
+- **macOS Styling**: Native accent color with hover states
+- **Typography**: Clear labeling for better accessibility
+- **Interactions**: Enhanced press animations and hover states (macOS)
+
+**Cross-Platform Enhancements**:
+- **iOS**: Futuristic glass design with gradient background and blue shadow
+- **macOS**: Standard button with accent color and hover feedback
+- **Both**: Consistent "New Chat" text with message icon for clarity
+
+**Visual Improvements**:
+- **Material Design**: Ultra-thin material base with gradient overlay
+- **Typography**: `.glassButton` font with proper line limiting
+- **Animation**: Smooth scale transitions and haptic feedback
+- **Accessibility**: Clear text label improves usability over icon-only design
+
+### Additional iOS UI Improvements
+
+#### Navigation Title Repositioning
+**Issue**: Centered navigation title limited space for toolbar buttons  
+**Solution**: Moved ChindaGo title to leading position for better toolbar layout  
+**Status**: ✅ Implemented  
+
+**Implementation**:
+- Created `.glassNavigationLeading()` modifier using `.navigationBarTitleDisplayMode(.large)`
+- Provides more space for model selection and new chat button in toolbar
+- Maintains glass material toolbar background
+
+#### Model List Visual Cleanup
+**Issue**: Border lines between models created visual clutter  
+**Solution**: Removed unnecessary borders, using spacing for separation  
+**Status**: ✅ Implemented  
+
+**Changes**:
+- Removed default border strokes from `ModelListRow`
+- Only show green border when model is selected
+- Cleaner visual hierarchy with better spacing
+
+### macOS-Specific Improvements
+
+#### Fixed Model Selection Display Issue
+**Issue**: Model selection sheet showed only search bar and done button with no models  
+**Cause**: Glass background overlay and iOS-specific styling interfering with macOS rendering  
+**Solution**: Platform-specific sheet layouts with simplified macOS design  
+**Status**: ✅ Fixed  
+
+**Implementation**:
+```swift
+#if os(iOS)
+ZStack {
+    Color.clear.background(.ultraThinMaterial)
+    VStack { /* iOS glass design */ }
+}
+#else
+VStack { /* Clean macOS layout */ }
+#endif
+```
+
+#### Enhanced New Chat Button for macOS
+**Issue**: Complex glass effects not suitable for macOS design patterns  
+**Solution**: Simplified button design matching macOS conventions  
+**Status**: ✅ Implemented  
+
+**macOS Design Features**:
+- Light accent color background with subtle border
+- Hover state animations appropriate for mouse interaction
+- Accent color text and icon for consistency
+- Standard macOS interaction patterns
+
+**Cross-Platform Button Design**:
+- **iOS**: Glass morphism with blue-cyan gradient and shadow effects
+- **macOS**: Clean button with accent color styling and hover states
+- **Both**: Same "New Chat" text and icon for consistent functionality
+
+### Final UI/UX Fixes
+
+#### iOS Navigation and Toolbar Improvements
+**Issues**: 
+1. Navigation title became large and moved down instead of staying in top bar
+2. Toolbar buttons (New Chat, Model Selection) hidden in overflow menu instead of being visible
+
+**Solution**: Proper toolbar item placement with inline navigation
+**Status**: ✅ Fixed
+
+**Implementation**:
+- Reverted to `.navigationBarTitleDisplayMode(.inline)` to keep title in top bar
+- Used specific `ToolbarItem(placement: .navigationBarTrailing)` for button visibility
+- Grouped buttons in `HStack` for compact toolbar arrangement
+- Separated error/progress indicators to leading placement
+
+#### macOS Model Selection List Fix
+**Issue**: Models not displaying in selection sheet (only search bar and Done button visible)
+**Cause**: SwiftUI List component rendering issues on macOS with custom styling
+**Solution**: Replaced List with ScrollView + LazyVStack for macOS
+**Status**: ✅ Fixed
+
+**Implementation**:
+```swift
+// macOS-specific list implementation
+ScrollView {
+    LazyVStack(spacing: 8) {
+        ForEach(filteredModels) { model in
+            ModelListRow(...)
+        }
+    }
+}
+.frame(maxHeight: 400)
+```
+
+**Enhanced ModelListRow for macOS**:
+- Added minimum height (60pt) for visibility
+- Gray background for unselected items (better contrast)
+- Subtle border for all items (selected gets accent color)
+- Proper spacing and padding for touch targets
+
+**Platform-Specific Improvements**:
+- **iOS**: Maintains glass morphism List with transparent backgrounds
+- **macOS**: Uses ScrollView with visible backgrounds and proper contrast
+- **Both**: Consistent functionality and search integration
+
+## Recent Optimizations (July 2025)
+
+### iOS Toolbar Redesign
+**Goal**: Create cleaner, more futuristic toolbar layout with Apple branding
+
+**Changes**:
+- **Apple Logo Branding**: Replaced "ChindaGo" title with Apple logo (🍎) in leading position
+- **Centered Model Selector**: Fixed width (180pt) with `.principal` placement for consistent layout
+- **Compact New Chat Button**: Changed to "square.and.pencil" icon, removed text, added glass styling
+- **Futuristic Info Display**: Replaced "info.circle" with "waveform.path", added performance-based colors and pulse animation
+
+**Layout**: `[🍎] [errors] ........ [Model Selector] ........ [ℹ️] [New Chat]`
+
+### Enhanced Throughput Info (GenerationInfoView)
+- **Icon**: "waveform.path" for real-time data visualization
+- **Smart Colors**: Green (>50), Blue (20-50), Orange (<20 tok/s)
+- **Pulse Animation**: Continuous scale animation when active
+- **Enhanced Popover**: Performance indicators, color-coded backgrounds, compact "Speed" label
+
+### UI Polish
+- **Keyboard Handling**: Tap chat area to dismiss on-screen keyboard
+- **Model List Spacing**: Reduced from 8pt to 4pt for tighter layout
+- **List Separators**: Removed horizontal lines in model selection for cleaner look
+- **Cross-Platform**: All features work on both iOS and macOS
+
+**Files Updated**: ChatView.swift, FuturisticModelSelector.swift, GenerationInfoView.swift, CompactNewChatButton.swift
+
 ## Future Enhancements
 
 ### Potential Additions

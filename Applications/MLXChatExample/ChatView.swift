@@ -9,13 +9,11 @@ import AVFoundation
 import AVKit
 import SwiftUI
 
-/// Main chat interface view with futuristic glass morphism design and floating elements.
+/// Main chat interface view with futuristic glass morphism design.
 /// Displays messages, handles media attachments, and provides input controls.
 struct ChatView: View {
     /// View model that manages the chat state and business logic
     @Bindable private var vm: ChatViewModel
-    
-    @State private var showNewChatButton = true
 
     /// Initializes the chat view with a view model
     /// - Parameter viewModel: The view model to manage chat state
@@ -35,6 +33,12 @@ struct ChatView: View {
                     // Display conversation history
                     ConversationView(messages: vm.messages)
                         .background(.clear)
+                        .onTapGesture {
+                            // Dismiss keyboard when tapping chat area
+                            #if os(iOS)
+                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                            #endif
+                        }
 
                     // Glass divider
                     Rectangle()
@@ -63,34 +67,42 @@ struct ChatView: View {
                     )
                     .background(.regularMaterial.opacity(0.8))
                 }
-                
-                // Floating New Chat Button
-                VStack {
-                    HStack {
-                        Spacer()
-                        
-                        if showNewChatButton {
-                            GlassNewChatButton {
-                                withAnimation(.glassSpring) {
-                                    vm.clear([.chat, .meta])
-                                }
-                            }
-                            .padding(.trailing, GlassDesignSystem.Spacing.xl)
-                            .padding(.top, GlassDesignSystem.Spacing.medium)
-                            .transition(.asymmetric(
-                                insertion: .scale.combined(with: .opacity),
-                                removal: .scale.combined(with: .opacity)
-                            ))
-                        }
-                    }
-                    
-                    Spacer()
-                }
             }
-            .navigationTitle("ChindaGo")
             .glassNavigation()
             .toolbar {
-                ChatToolbarView(vm: vm)
+                // Apple logo in leading position
+                ToolbarItem(placement: .navigationBarLeading) {
+                    HStack(spacing: GlassDesignSystem.Spacing.xs) {
+                        Image(systemName: "applelogo")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.primary)
+                        
+                        // Error and download progress indicators
+                        if let errorMessage = vm.errorMessage {
+                            ErrorView(errorMessage: errorMessage)
+                        }
+                        
+                        if let progress = vm.modelDownloadProgress, !progress.isFinished {
+                            DownloadProgressView(progress: progress)
+                        }
+                    }
+                }
+                
+                // Model selector centered
+                ToolbarItem(placement: .principal) {
+                    FuturisticModelSelector(selectedModel: $vm.selectedModel)
+                        .frame(width: 180) // Fixed width
+                }
+                
+                // Info and new chat buttons in trailing position
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    HStack(spacing: GlassDesignSystem.Spacing.small) {
+                        GenerationInfoView(tokensPerSecond: vm.tokensPerSecond)
+                        CompactNewChatButton {
+                            vm.clear([.chat, .meta])
+                        }
+                    }
+                }
             }
             // Handle media file selection
             .fileImporter(
@@ -98,18 +110,6 @@ struct ChatView: View {
                 allowedContentTypes: [.image, .movie],
                 onCompletion: vm.addMedia
             )
-            // Hide new chat button when generating
-            .onChange(of: vm.isGenerating) { _, isGenerating in
-                withAnimation(.glassEaseInOut) {
-                    showNewChatButton = !isGenerating
-                }
-            }
-            // Hide new chat button when typing
-            .onChange(of: vm.prompt) { _, newPrompt in
-                withAnimation(.glassEaseInOut) {
-                    showNewChatButton = newPrompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                }
-            }
         }
     }
 }
