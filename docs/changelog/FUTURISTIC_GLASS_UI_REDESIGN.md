@@ -582,6 +582,34 @@ ScrollView {
 
 **Files Updated**: ChatView.swift, FuturisticModelSelector.swift, GenerationInfoView.swift, CompactNewChatButton.swift
 
+### Cross-Platform Toolbar Compatibility Fixes
+**Issue**: iOS-specific `ToolbarItemPlacement` values causing macOS compilation failures  
+**Cause**: Direct usage of `.navigationBarLeading`/`.navigationBarTrailing` and incorrect `.leading`/`.trailing` placements  
+**Solution**: Fixed GlassDesignSystem cross-platform modifiers and optimized toolbar layout  
+**Status**: ✅ Fixed  
+
+**Technical Fixes**:
+- **GlassDesignSystem.swift**: Fixed macOS toolbar placement from `.leading`/`.trailing` to `.navigation`
+- **ChatView.swift**: Replaced iOS-specific placements with cross-platform helper functions
+- **Optimized Layout**: Reorganized toolbar structure for consistent cross-platform experience
+
+**New Toolbar Layout**:
+```
+[🍎 Logo] [Errors/Downloads] ........ [Model Selector] ........ [Speed] [New Chat]
+```
+
+**Implementation Details**:
+- **Leading**: Apple logo + error/download indicators with proper spacing
+- **Principal**: Model selector always centered on both platforms (removed platform-specific logic)
+- **Trailing**: Speed indicator with `.automatic` placement, New Chat button with `.primaryAction` for rightmost positioning
+- **App Name**: Removed navigation title on both platforms for cleaner appearance
+
+**Cross-Platform Benefits**:
+- ✅ **Consistent Layout**: Same structure on iOS and macOS
+- ✅ **Proper Positioning**: New Chat button guaranteed at rightmost position
+- ✅ **Clean Design**: Removed app name, optimized spacing and element separation
+- ✅ **Maintainable**: Simplified conditional logic and unified toolbar approach
+
 ## Future Enhancements
 
 ### Potential Additions
