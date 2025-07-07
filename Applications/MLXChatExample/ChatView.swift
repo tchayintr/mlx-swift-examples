@@ -69,38 +69,38 @@ struct ChatView: View {
                 }
             }
             .glassNavigation()
-            .toolbar {
-                // Apple logo in leading position
-                ToolbarItem(placement: .navigationBarLeading) {
-                    HStack(spacing: GlassDesignSystem.Spacing.xs) {
-                        Image(systemName: "applelogo")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.primary)
-                        
-                        // Error and download progress indicators
-                        if let errorMessage = vm.errorMessage {
-                            ErrorView(errorMessage: errorMessage)
-                        }
-                        
-                        if let progress = vm.modelDownloadProgress, !progress.isFinished {
-                            DownloadProgressView(progress: progress)
-                        }
+            .glassToolbarLeading {
+                HStack(spacing: GlassDesignSystem.Spacing.small) {
+                    // Logo icon positioned at leftmost
+                    Image(systemName: "applelogo")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(.primary)
+                    
+                    // Error and download progress indicators (separated from logo)
+                    if let errorMessage = vm.errorMessage {
+                        ErrorView(errorMessage: errorMessage)
+                    }
+                    
+                    if let progress = vm.modelDownloadProgress, !progress.isFinished {
+                        DownloadProgressView(progress: progress)
                     }
                 }
-                
-                // Model selector centered
-                ToolbarItem(placement: .principal) {
-                    FuturisticModelSelector(selectedModel: $vm.selectedModel)
-                        .frame(width: 180) // Fixed width
+            }
+            .glassToolbarPrincipal {
+                // Model selector always centered on both platforms
+                FuturisticModelSelector(selectedModel: $vm.selectedModel)
+                    .frame(width: 180) // Fixed width
+            }
+            .toolbar {
+                // Speed indicator
+                ToolbarItem(placement: .automatic) {
+                    GenerationInfoView(tokensPerSecond: vm.tokensPerSecond)
                 }
                 
-                // Info and new chat buttons in trailing position
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    HStack(spacing: GlassDesignSystem.Spacing.small) {
-                        GenerationInfoView(tokensPerSecond: vm.tokensPerSecond)
-                        CompactNewChatButton {
-                            vm.clear([.chat, .meta])
-                        }
+                // New Chat button - rightmost position
+                ToolbarItem(placement: .primaryAction) {
+                    CompactNewChatButton {
+                        vm.clear([.chat, .meta])
                     }
                 }
             }

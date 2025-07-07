@@ -219,9 +219,11 @@ extension View {
         #if os(iOS)
         self
             .navigationBarTitleDisplayMode(.inline)
+            .navigationTitle("") // Remove app name
             .toolbarBackground(.regularMaterial, for: .navigationBar)
         #else
         self
+            .navigationTitle("") // Remove app name on macOS too
             // macOS: Use default navigation styling
         #endif
     }
@@ -265,7 +267,7 @@ extension View {
         }
         #else
         self.toolbar {
-            ToolbarItem(placement: .leading) {
+            ToolbarItem(placement: .navigation) {
                 content()
             }
         }
@@ -291,7 +293,7 @@ extension View {
         }
         #else
         self.toolbar {
-            ToolbarItem(placement: .trailing) {
+            ToolbarItem(placement: .navigation) {
                 content()
             }
         }
